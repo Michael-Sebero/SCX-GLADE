@@ -481,8 +481,9 @@ s32 BPF_STRUCT_OPS(imperator_select_cpu, struct task_struct *p, s32 prev_cpu,
      *   • idle path (dummy_idle)→ lazy lookup deferred to after dfl call
      * The all-busy non-SYNC non-IRQ path (dominant under load) never touches
      * task storage in select_cpu. */
-    bool in_hardirq_or_nmi = bpf_in_hardirq() || bpf_in_nmi();
-    bool in_softirq        = bpf_in_serving_softirq();
+    bool in_hardirq_or_nmi = (bpf_in_hardirq ? bpf_in_hardirq() : false) ||
+                              (bpf_in_nmi ? bpf_in_nmi() : false);
+    bool in_softirq        = bpf_in_serving_softirq ? bpf_in_serving_softirq() : false;
     bool irq_context       = in_hardirq_or_nmi || in_softirq;
 
     /* ksoftirqd check: only on non-SYNC, non-IRQ paths (same guard as before) */
